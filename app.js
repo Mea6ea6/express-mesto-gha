@@ -10,3 +10,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
 })
+
+// mongoose.connect('mongodb://localhost:27017/mestodb', {
+// });
