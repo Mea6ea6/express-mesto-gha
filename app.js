@@ -1,15 +1,15 @@
 const express = require('express');
-const { PORT = 3000 } = process.env;
+// const mongoose = require('mongoose');
+const { PORT = 3000, DB_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 
 const app = express();
 
 app.get('/', (req, res) => {
-  res.status(200).send({message:"All In!"})
+  res.status(200).send({message:"Ты молодец!"})
 })
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
 })
 
-// mongoose.connect('mongodb://localhost:27017/mestodb', {
-// });
+// mongoose.connect(DB_URL)

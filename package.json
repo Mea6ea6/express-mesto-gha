@@ -1,6 +1,6 @@
 {
   "name": "mesto-express",
-  "description": "__Название:__ «Место-express-gh»",
+  "description": "express-mesto-gha",
   "version": "1.0.0",
   "main": "app.js",
   "keywords": [],
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "mongoose": "^8.0.1",
     "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
