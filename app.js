@@ -9,7 +9,7 @@ app.get('/', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
+  console.log(`app.js listening on port: ${PORT}`)
 })
 
 // mongoose.connect(DB_URL)
