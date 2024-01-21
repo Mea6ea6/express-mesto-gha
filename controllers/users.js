@@ -91,7 +91,13 @@ const updateAvatar = (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password).select('+password')
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      return bcrypt.compare(password, user.password);
+    })
     .then((user) => {
       res.send({
         token: jwt.sign({ _id: user._id }, 'dev-secret', { expiresIn: '7d' }),
