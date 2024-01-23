@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const Card = require('../models/card');
 const BadRequestError = require('../errors/BadRequestError');
 const InternalServerError = require('../errors/InternalServerError');
@@ -20,7 +19,7 @@ const createCard = async (req, res, next) => {
     .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return next(new BadRequestError('Переданы некорректные данные при создании карточки'));
+        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -28,20 +27,21 @@ const createCard = async (req, res, next) => {
 
 const deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
-  const { _id: userId } = req.user;
   Card.findByIdAndDelete(cardId)
     .then((card) => {
-      if (userId !== card.owner.toString()) {
-        next(new UserRightsError('Невозможно удалить карточку.'));
+      if (!card) {
+        return next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
-      return res.status(200).send({ message: `Карточка с ID: ${card._id} была успешно удалена` });
+      if (!card.owner.equals(req.user._id)) {
+        return next(new UserRightsError('Невозможно удалить карточку.'));
+      }
+      return card.deleteOne()
+        .then(() => res.status(201).send({ message: `Карточка с ID: ${card._id} была успешно удалена` }))
+        .catch(next);
     })
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        return next(new BadRequestError('Переданы некорректные данные при удалении карточки'));
-      }
       if (error.name === 'CastError') {
-        return next(new BadRequestError('Передан не валидный ID карточки'));
+        next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -51,15 +51,16 @@ const likeCard = (req, res, next) => {
   const { cardId } = req.params;
   const owner = req.user._id;
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
+    .orFail(new Error('NotValidId'))
     .then((card) => {
       res.send({ message: `Карточке с ID: ${card._id} поставлен лайк`, data: card });
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
-        return next(new NotFoundError('Карточка по указанному ID не найдена'));
+        next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
       if (error.name === 'CastError') {
-        return next(new BadRequestError('Передан не валидный ID карточки'));
+        next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -69,15 +70,16 @@ const dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   const owner = req.user._id;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
+    .orFail(new Error('NotValidId'))
     .then((card) => {
       res.send({ message: `У карточке с ID: ${card._id} убран лайк`, data: card });
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
-        return next(new NotFoundError('Карточка по указанному ID не найдена'));
+        next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
       if (error.name === 'CastError') {
-        return next(new BadRequestError('Передан не валидный ID карточки'));
+        next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });

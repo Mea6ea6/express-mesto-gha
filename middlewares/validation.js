@@ -1,6 +1,13 @@
 /* eslint-disable max-len */
-/* eslint-disable import/no-extraneous-dependencies */
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
+
+const validateURL = (value) => {
+  if (!validator.isURL(value, { protocols: ['http', 'https'], require_protocol: true })) {
+    throw new Error('Неправильный формат ссылки');
+  }
+  return value;
+};
 
 const loginValid = celebrate({
   body: Joi.object().keys({
@@ -15,7 +22,7 @@ const createUserValid = celebrate({
     password: Joi.string().required().min(8),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri({ scheme: ['http', 'https'] }),
+    avatar: Joi.string().custom(validateURL),
   }),
 });
 
@@ -39,9 +46,7 @@ const updateUserInfoValid = celebrate({
 
 const updateUserAvatarValid = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string()
-      .required()
-      .uri({ scheme: ['http', 'https'] }),
+    avatar: Joi.string().required().custom(validateURL),
   }),
 });
 
@@ -59,9 +64,7 @@ const checkCardIdValid = celebrate({
 const createCardValid = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string()
-      .required()
-      .uri({ scheme: ['http', 'https'] }),
+    link: Joi.string().required().custom(validateURL),
   }),
 });
 

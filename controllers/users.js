@@ -1,7 +1,7 @@
-/* eslint-disable no-underscore-dangle */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const AuthorizationError = require('../errors/AuthorizationError');
 const BadRequestError = require('../errors/BadRequestError');
 const DublicateError = require('../errors/DublicateError');
 const InternalServerError = require('../errors/InternalServerError');
@@ -10,14 +10,19 @@ const NotFoundError = require('../errors/NotFoundError');
 const getUsers = async (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(200).send(users);
+      res.send(users);
     })
     .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
 };
 
 const getUserInfo = async (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => res.status(200).send({ message: 'Текущий пользователь', data: user }))
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        return next(new AuthorizationError('Пользователь не авторизован'));
+      }
+      return res.send({ message: 'Текущий пользователь', data: user });
+    })
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new BadRequestError('Переданы невалидный ID'));
@@ -28,7 +33,8 @@ const getUserInfo = async (req, res, next) => {
 
 const getUsersById = async (req, res, next) => {
   User.findById(req.params.userId)
-    .then((user) => res.status(200).send({ message: `По ID ${user._id} успешно найден пользователь`, data: user }))
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.send({ message: `По ID ${user._id} успешно найден пользователь`, data: user }))
     .catch((error) => {
       if (error.message === 'NotValidId') {
         next(new NotFoundError('Пользователь по указанному ID не найден'));
@@ -45,8 +51,8 @@ const createUser = async (req, res, next) => {
     name, about, avatar, email,
   } = req.body;
   bcrypt.hash(req.body.password, 10)
-    .then((password) => User.create({
-      name, about, avatar, email, password,
+    .then((hashedPassword) => User.create({
+      name, about, avatar, email, password: hashedPassword,
     }))
     .then((user) => res.status(201).send({ message: 'Успешно создан новый пользователь', data: user }))
     .catch((error) => {
@@ -94,7 +100,7 @@ const login = async (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return next(new AuthorizationError('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password);
     })
@@ -103,12 +109,7 @@ const login = async (req, res, next) => {
         token: jwt.sign({ _id: user._id }, 'dev-secret', { expiresIn: '7d' }),
       });
     })
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID пользователя'));
-      }
-      return next(new InternalServerError('Ошибка со стороны сервера'));
-    });
+    .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
 };
 
 module.exports = {
