@@ -97,7 +97,7 @@ const updateAvatar = (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         return next(new AuthorizationError('Неправильные почта или пароль'));
@@ -105,9 +105,7 @@ const login = async (req, res, next) => {
       return bcrypt.compare(password, user.password);
     })
     .then((user) => {
-      res.send({
-        token: jwt.sign({ _id: user._id }, 'dev-secret', { expiresIn: '7d' }),
-      });
+      res.send({ message: 'Успешный логин', token: jwt.sign({ _id: user._id }, 'dev-secret', { expiresIn: '7d' }) });
     })
     .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
 };

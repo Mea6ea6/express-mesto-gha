@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -23,11 +24,14 @@ app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
 
 app.use(router);
-router.use((req, res, next) => next(new NotFoundError('Страница не найдена')));
+router.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
 app.use((err, req, res, next) => {
+  if (err.isJoi || (err.details && err.details.get('body'))) {
+    const validationError = err.details.get('body');
+    return res.status(400).json({ message: 'Ошибка', error: validationError.message });
+  }
   const statusCode = err.statusCode || 500;
-
   const message = statusCode === 500 ? 'На сервере произошла ошибка' : err.message;
   res.status(statusCode).send({ message });
   next();

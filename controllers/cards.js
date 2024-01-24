@@ -13,7 +13,7 @@ const getCards = async (req, res, next) => {
 };
 
 const createCard = async (req, res, next) => {
-  const owner = req.user._id;
+  const owner = req.params.userId;
   const { name, link } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))

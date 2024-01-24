@@ -12,7 +12,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Поле "link" должно быть заполнено'],
     validate: {
-      validator: (link) => validator.isURL(link, { protocols: ['http', 'https'], require_protocol: false }),
+      validator: (link) => validator.isURL(link, { require_protocol: false }),
       message: 'Введен некорректный link',
     },
   },
