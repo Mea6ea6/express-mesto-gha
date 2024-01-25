@@ -70,7 +70,7 @@ const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.send({ message: 'Успешное обновление информации профиля', data: user }))
+    .then((user) => res.status(201).send({ message: 'Успешное обновление информации профиля', data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
@@ -109,8 +109,8 @@ const login = async (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
       return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     })
-    .then((user) => {
-      res.send({ message: 'Успешная авторизация', data: { user } });
+    .then(() => {
+      res.send({ message: 'Успешная авторизация' });
     })
     .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
 };
