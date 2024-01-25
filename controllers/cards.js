@@ -13,9 +13,8 @@ const getCards = async (req, res, next) => {
 };
 
 const createCard = async (req, res, next) => {
-  const owner = req.params.userId;
   const { name, link } = req.body;
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
