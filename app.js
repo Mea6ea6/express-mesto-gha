@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
@@ -18,6 +20,7 @@ mongoose.connect(DB_URL);
 
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
