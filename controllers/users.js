@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -21,7 +22,7 @@ const getUserInfo = async (req, res, next) => {
       if (!user) {
         return next(new AuthorizationError('Пользователь не авторизован'));
       }
-      return res.send({ message: 'Текущий пользователь', data: user });
+      return res.send({ user });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -34,7 +35,7 @@ const getUserInfo = async (req, res, next) => {
 const getUsersById = async (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(new Error('NotValidId'))
-    .then((user) => res.send({ message: `По ID ${user._id} успешно найден пользователь`, data: user }))
+    .then((user) => res.send({ user }))
     .catch((error) => {
       if (error.message === 'NotValidId') {
         return next(new NotFoundError('Пользователь по указанному ID не найден'));
@@ -54,7 +55,7 @@ const createUser = async (req, res, next) => {
     .then((hashedPassword) => User.create({
       name, about, avatar, email, password: hashedPassword,
     }))
-    .then(() => res.status(201).send({ message: 'Успешно создан новый пользователь' }))
+    .then((user) => res.status(201).send({ user }))
     .catch((error) => {
       if (error.code === 11000) {
         return next(new DublicateError('Пользователь с таким email уже существует.'));
@@ -70,7 +71,7 @@ const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.send({ message: 'Успешное обновление информации профиля', data: user }))
+    .then((user) => res.send({ user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
@@ -83,7 +84,7 @@ const updateAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.send({ message: 'Успешное обновление аватара', data: user }))
+    .then((user) => res.send({ user }))
     .catch((error) => {
       if (error.name === 'CastError') {
         return next(new BadRequestError('Передан не валидный ID пользователя'));
@@ -102,12 +103,14 @@ const login = async (req, res, next) => {
       if (!user) {
         return next(new AuthorizationError('Неправильные почта или пароль'));
       }
-      const isPasswordValid = bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return next(new AuthorizationError('Неправильные почта или пароль'));
-      }
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
-      return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+      bcrypt.compare(password, user.password)
+        .then((isPasswordValid) => {
+          if (!isPasswordValid) {
+            return next(new AuthorizationError('Неправильные почта или пароль'));
+          }
+          const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+          return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        });
     })
     .then(() => {
       res.send({ message: 'Успешная авторизация' });

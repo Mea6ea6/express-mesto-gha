@@ -15,7 +15,7 @@ const getCards = async (req, res, next) => {
 const createCard = async (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))
+    .then((card) => res.status(201).send({ card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные при создании карточки'));
@@ -26,7 +26,7 @@ const createCard = async (req, res, next) => {
 
 const deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
-  Card.findByIdAndDelete(cardId)
+  Card.findById(cardId)
     .then((deletedCard) => {
       if (!deletedCard) {
         return next(new NotFoundError('Карточка по указанному ID не найдена'));

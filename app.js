@@ -1,6 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
-/* eslint-disable consistent-return */
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
@@ -19,6 +20,7 @@ mongoose.connect(DB_URL);
 
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
@@ -27,8 +29,6 @@ app.use(router);
 router.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
 app.use(errors());
-
-app.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
 app.use((error, req, res, next) => {
   const statusCode = error.statusCode || 500;
