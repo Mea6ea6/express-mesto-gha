@@ -35,7 +35,7 @@ const deleteCard = async (req, res, next) => {
         return next(new UserRightsError('Недостаточно прав для удаления карточки'));
       }
       return deletedCard.deleteOne()
-        .then(() => res.status(201).send({ message: `Карточка с ID: ${deletedCard._id} была успешно удалена` }))
+        .then(() => res.send({ message: `Карточка с ID: ${deletedCard._id} была успешно удалена` }))
         .catch(next);
     })
     .catch((error) => {
