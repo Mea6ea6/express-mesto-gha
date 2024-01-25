@@ -28,15 +28,15 @@ const createCard = async (req, res, next) => {
 const deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndDelete(cardId)
-    .then((card) => {
-      if (!card) {
+    .then((deletedCard) => {
+      if (!deletedCard) {
         return next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
-      if (!card.owner.equals(req.user._id)) {
-        return next(new UserRightsError('Невозможно удалить карточку.'));
+      if (deletedCard.owner.toString() !== req.user._id.toString()) {
+        return next(new UserRightsError('Недостаточно прав для удаления карточки'));
       }
-      return card.deleteOne()
-        .then(() => res.status(201).send({ message: `Карточка с ID: ${card._id} была успешно удалена` }))
+      return deletedCard.deleteOne()
+        .then(() => res.status(201).send({ message: `Карточка с ID: ${deletedCard._id} была успешно удалена` }))
         .catch(next);
     })
     .catch((error) => {
