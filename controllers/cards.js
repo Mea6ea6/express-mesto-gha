@@ -15,7 +15,7 @@ const getCards = async (req, res, next) => {
 const createCard = async (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))
+    .then((card) => res.status(201).send(req.params, { message: 'Успешно создана новая карточка', data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные при создании карточки'));
@@ -48,11 +48,10 @@ const deleteCard = async (req, res, next) => {
 
 const likeCard = (req, res, next) => {
   const { cardId } = req.params;
-  const owner = req.user._id;
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .orFail(new Error('NotValidId'))
     .then((card) => {
-      res.send({ message: `Карточке с ID: ${card._id} поставлен лайк`, data: card });
+      res.send({ message: `Карточке с ID: ${card._id} поставлен лайк` });
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
@@ -67,11 +66,10 @@ const likeCard = (req, res, next) => {
 
 const dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
-  const owner = req.user._id;
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .orFail(new Error('NotValidId'))
     .then((card) => {
-      res.send({ message: `У карточке с ID: ${card._id} убран лайк`, data: card });
+      res.send({ message: `У карточке с ID: ${card._id} убран лайк` });
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
