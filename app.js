@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 const express = require('express');
 const mongoose = require('mongoose');
