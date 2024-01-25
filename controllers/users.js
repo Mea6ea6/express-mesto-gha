@@ -54,7 +54,7 @@ const createUser = async (req, res, next) => {
     .then((hashedPassword) => User.create({
       name, about, avatar, email, password: hashedPassword,
     }))
-    .then((user) => res.status(201).send({ message: 'Успешно создан новый пользователь', data: user }))
+    .then(() => res.status(201).send({ message: 'Успешно создан новый пользователь' }))
     .catch((error) => {
       if (error.code === 11000) {
         return next(new DublicateError('Пользователь с таким email уже существует.'));
