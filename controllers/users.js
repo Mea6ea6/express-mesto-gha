@@ -97,22 +97,21 @@ const updateAvatar = (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        return next(new AuthorizationError('Неправильные почта или пароль'));
-      }
-      const isPasswordValid = bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return next(new AuthorizationError('Неправильные почта или пароль'));
-      }
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
-      return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    })
-    .then(() => {
-      res.send({ message: 'Успешная авторизация' });
-    })
-    .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return next(new AuthorizationError('Неправильные почта или пароль'));
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return next(new AuthorizationError('Неправильные почта или пароль'));
+    }
+    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+    res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    return res.send({ message: 'Успешная авторизация' });
+  } catch (error) {
+    return next(new InternalServerError('Ошибка со стороны сервера'));
+  }
 };
 
 module.exports = {
