@@ -16,7 +16,7 @@ const getUsers = async (req, res, next) => {
 };
 
 const getUserInfo = async (req, res, next) => {
-  User.findById(req.params.userId)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         return next(new AuthorizationError('Пользователь не авторизован'));
