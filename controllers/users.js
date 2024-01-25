@@ -102,10 +102,15 @@ const login = async (req, res, next) => {
       if (!user) {
         return next(new AuthorizationError('Неправильные почта или пароль'));
       }
-      return bcrypt.compare(password, user.password);
+      const isPasswordValid = bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return next(new AuthorizationError('Неправильные почта или пароль'));
+      }
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     })
     .then((user) => {
-      res.send({ message: 'Успешный логин', token: jwt.sign({ _id: user._id }, 'dev-secret', { expiresIn: '7d' }) });
+      res.send({ message: 'Успешная авторизация', data: { user } });
     })
     .catch(() => next(new InternalServerError('Ошибка со стороны сервера')));
 };
