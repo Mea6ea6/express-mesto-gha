@@ -19,7 +19,7 @@ const createCard = async (req, res, next) => {
     .then((card) => res.status(201).send({ message: 'Успешно создана новая карточка', data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
+        return next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -41,7 +41,7 @@ const deleteCard = async (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID карточки'));
+        return next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -57,10 +57,10 @@ const likeCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
-        next(new NotFoundError('Карточка по указанному ID не найдена'));
+        return next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
       if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID карточки'));
+        return next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -76,10 +76,10 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.message === 'NotValidId') {
-        next(new NotFoundError('Карточка по указанному ID не найдена'));
+        return next(new NotFoundError('Карточка по указанному ID не найдена'));
       }
       if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID карточки'));
+        return next(new BadRequestError('Передан не валидный ID карточки'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });

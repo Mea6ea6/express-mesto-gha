@@ -25,7 +25,7 @@ const getUserInfo = async (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequestError('Переданы невалидный ID'));
+        return next(new BadRequestError('Переданы невалидный ID'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -37,10 +37,10 @@ const getUsersById = async (req, res, next) => {
     .then((user) => res.send({ message: `По ID ${user._id} успешно найден пользователь`, data: user }))
     .catch((error) => {
       if (error.message === 'NotValidId') {
-        next(new NotFoundError('Пользователь по указанному ID не найден'));
+        return next(new NotFoundError('Пользователь по указанному ID не найден'));
       }
       if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID пользователя'));
+        return next(new BadRequestError('Передан не валидный ID пользователя'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -57,10 +57,10 @@ const createUser = async (req, res, next) => {
     .then((user) => res.status(201).send({ message: 'Успешно создан новый пользователь', data: user }))
     .catch((error) => {
       if (error.code === 11000) {
-        next(new DublicateError('Пользователь с таким email уже существует.'));
+        return next(new DublicateError('Пользователь с таким email уже существует.'));
       }
       if (error.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -73,7 +73,7 @@ const updateProfile = (req, res, next) => {
     .then((user) => res.status(201).send({ message: 'Успешное обновление информации профиля', data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+        return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
@@ -86,10 +86,10 @@ const updateAvatar = (req, res, next) => {
     .then((user) => res.send({ message: 'Успешное обновление аватара', data: user }))
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequestError('Передан не валидный ID пользователя'));
+        return next(new BadRequestError('Передан не валидный ID пользователя'));
       }
       if (error.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
+        return next(new BadRequestError('Переданы некорректные данные при обновлении аватара'));
       }
       return next(new InternalServerError('Ошибка со стороны сервера'));
     });
