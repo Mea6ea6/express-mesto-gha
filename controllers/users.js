@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -103,14 +102,12 @@ const login = async (req, res, next) => {
       if (!user) {
         return next(new AuthorizationError('Неправильные почта или пароль'));
       }
-      bcrypt.compare(password, user.password)
-        .then((isPasswordValid) => {
-          if (!isPasswordValid) {
-            return next(new AuthorizationError('Неправильные почта или пароль'));
-          }
-          const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
-          return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
-        });
+      const isPasswordValid = bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return next(new AuthorizationError('Неправильные почта или пароль'));
+      }
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      return res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
     })
     .then(() => {
       res.send({ message: 'Успешная авторизация' });
