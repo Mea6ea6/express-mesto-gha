@@ -70,7 +70,7 @@ const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.status(201).send({ message: 'Успешное обновление информации профиля', data: user }))
+    .then((user) => res.send({ message: 'Успешное обновление информации профиля', data: user }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
