@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const router = require('./routes');
 
 const { login, createUser } = require('./controllers/users');
@@ -22,11 +23,15 @@ app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(requestLogger);
+
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
 
 app.use(router);
 router.use('/', (req, res, next) => next(new NotFoundError('Страница не найдена')));
+
+app.use(errorLogger);
 
 app.use(errors());
 
