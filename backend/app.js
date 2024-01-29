@@ -25,6 +25,12 @@ app.use(cookieParser());
 
 app.use(requestLogger);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.post('/signin', loginValid, login);
 app.post('/signup', createUserValid, createUser);
 
