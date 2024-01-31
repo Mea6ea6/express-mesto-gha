@@ -4,12 +4,6 @@ __Название:__ «Express Mesto Gha»
 
 ------
 
-__Директории и файлы__  
-
-- IP: 130.193.39.20
-- domain (frontend): http://domainigor.students.nomoredomainsmonster.ru
-- domain (backend): http://api.domainigor.students.nomoredomainsmonster.ru
-
 
 __Директории и файлы__  
 
