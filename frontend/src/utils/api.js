@@ -70,9 +70,9 @@ class Api {
 }
 
 const apiConfig = {
-  url: 'https://mesto.nomoreparties.co/v1/cohort-73',
+  url: 'https://api.domainigor.students.nomoredomainsmonster.ru',
+  credentials: 'include',
   headers: {
-      authorization: '06d23768-be94-43bd-8bc4-98ba10f0190d',
       'Content-Type': 'application/json'
   }
 }

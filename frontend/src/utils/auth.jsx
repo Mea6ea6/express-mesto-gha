@@ -1,4 +1,4 @@
-const baseUrl = "https://auth.nomoreparties.co";
+const baseUrl = "https://api.domainigor.students.nomoredomainsmonster.ru";
 
 function getResponse(res) {
   return res.ok ? res.json() : res.json().then((errData) => Promise.reject(errData));
