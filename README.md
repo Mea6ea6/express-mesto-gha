@@ -1,4 +1,4 @@
-# [Проектная работа](http://domainigor.students.nomoredomainsmonster.ru/)  
+# Проектная работа
 
 __Название:__ «Express Mesto Gha»  
 
